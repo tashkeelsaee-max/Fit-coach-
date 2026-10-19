@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Fit Coach Desi</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f7a5a">
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --fg:#1c2321; --mute:#5f6b67; --line:#e2e0d8;
+  --accent:#0f7a5a; --accent-fg:#ffffff; --warn:#b45309; --soft:#e7f2ed;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --card:#18201d; --fg:#eef3f0; --mute:#9aa8a2; --line:#2a3530;
+    --accent:#3fbf93; --accent-fg:#06180f; --warn:#f0a95c; --soft:#1d2d27; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --card:#18201d; --fg:#eef3f0; --mute:#9aa8a2; --line:#2a3530;
+  --accent:#3fbf93; --accent-fg:#06180f; --warn:#f0a95c; --soft:#1d2d27; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-bottom:calc(90px + env(safe-area-inset-bottom,0px));}
+h1{font-size:24px;margin:18px 0 4px;letter-spacing:-.3px;text-wrap:balance}
+h2{font-size:19px;margin:0 0 10px}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:6px 0}
+.mute{color:var(--mute);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+label{display:block;font-size:14px;color:var(--mute);margin-top:12px}
+input,select{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-top:4px}
+button{font:inherit;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:12px;padding:12px 14px}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);width:100%;margin-top:14px}
+button.ghost{background:transparent}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 140px;min-width:0}
+.stat{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.stat:last-child{border:0}
+.big{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent)}
+.pill{display:inline-block;background:var(--soft);color:var(--accent);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700}
+.warn{color:var(--warn)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.check:last-child{border:0}
+.check input{width:auto;margin-top:4px}
+ul{padding-left:20px;margin:6px 0}
+li{margin:3px 0}
+.ex{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+a.link{color:var(--accent);font-weight:600;word-break:break-word}
+.set{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end}
+#tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;padding:8px max(8px,env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+#tabs button{border:0;background:none;padding:6px 4px;font-size:12px;color:var(--mute);flex:1;min-width:0}
+#tabs button[aria-current="page"]{color:var(--accent);font-weight:700}
+.empty{color:var(--mute);text-align:center;padding:18px 0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Fit Coach Desi</h1>
+  <p class="mute">Choose your exercises, view the gym guide, and plan a simple diet.</p>
+  <p class="mute warn" style="font-size:13px">This is general information, not medical advice. If you have a health condition or are starting intense exercise for the first time, please consult a doctor.</p>
+</header>
+
+<!-- PROFILE -->
+<section id="s-profile" data-tab="profile" hidden>
+  <div class="card">
+    <h2>Your details</h2>
+    <label>Name<input id="p-name" type="text" placeholder="Your name"></label>
+    <div class="row">
+      <label>Age (years)<input id="p-age" type="number" min="12" max="90"></label>
+      <label>Sex
+        <select id="p-sex"><option value="m">Male</option><option value="f">Female</option></select>
+      </label>
+    </div>
+    <div class="row">
+      <label>Height (cm)<input id="p-h" type="number" min="100" max="230"></label>
+      <label>Weight (kg)<input id="p-w" type="number" min="30" max="250" step="0.5"></label>
+    </div>
+    <label>Daily activity
+      <select id="p-act">
+        <option value="1.2">Mostly sitting (desk job)</option>
+        <option value="1.375">Light activity (1 to 3 days a week)</option>
+        <option value="1.55">Moderate (3 to 5 days a week)</option>
+        <option value="1.725">Very active (exercise daily)</option>
+      </select>
+    </label>
+    <label>Goal
+      <select id="p-goal">
+        <option value="lose">Lose weight</option>
+        <option value="maintain">Maintain weight</option>
+        <option value="gain">Build muscle / gain weight</option>
+      </select>
+    </label>
+    <button class="primary" id="saveProfile">Save</button>
+  </div>
+</section>
+
+<!-- HOME -->
+<section id="s-home" data-tab="home" hidden>
+  <div class="card" id="homeCard"></div>
+  <div class="card">
+    <h2>This week</h2>
+    <div class="stat"><span>Workouts</span><b id="wk-count">0</b></div>
+    <div class="stat"><span>Total logged sets</span><b id="set-count">0</b></div>
+  </div>
+</section>
+
+<!-- WORKOUT BUILDER -->
+<section id="s-build" data-tab="build" hidden>
+  <div class="card">
+    <h2>Build your routine</h2>
+    <p class="mute">Tick the exercises you want to do, then save.</p>
+    <div id="exPick"></div>
+    <button class="primary" id="saveRoutine">Save routine</button>
+  </div>
+  <div class="card">
+    <h2>Today's workout</h2>
+    <div id="todayWorkout"><p class="empty">Save a routine above first.</p></div>
+  </div>
+</section>
+
+<!-- GYM GUIDE -->
+<section id="s-guide" data-tab="guide" hidden>
+  <div class="card">
+    <h2>Gym guide</h2>
+    <p class="mute">Steps and common mistakes for each exercise. The video link opens a YouTube search so you can pick a clear video.</p>
+    <div id="guideList"></div>
+  </div>
+</section>
+
+<!-- DIET -->
+<section id="s-diet" data-tab="diet" hidden>
+  <div class="card">
+    <h2>Simple daily meal plan</h2>
+    <p class="mute">This is a general example. Adjust portions to your needs.</p>
+    <div id="dietPlan"></div>
+  </div>
+  <div class="card">
+    <h2>Protein sources</h2>
+    <ul>
+      <li>Eggs (2 eggs, about 12g protein)</li>
+      <li>Lentils, chickpeas, kidney beans (1 bowl, about 12 to 15g)</li>
+      <li>Chicken breast, fish (100g, about 20 to 25g)</li>
+      <li>Yogurt and paneer (1 bowl of yogurt, about 8 to 10g)</li>
+      <li>Milk and dairy products</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Water</h2>
+    <p id="waterTxt" class="mute"></p>
+  </div>
+</section>
+
+<!-- LOG -->
+<section id="s-log" data-tab="log" hidden>
+  <div class="card">
+    <h2>Progress log</h2>
+    <p class="mute">Save after every workout. Data stays on this phone.</p>
+    <div id="logList"></div>
+  </div>
+</section>
+
+<nav id="tabs" aria-label="Main">
+  <button data-go="home">Home</button>
+  <button data-go="build">Routine</button>
+  <button data-go="guide">Guide</button>
+  <button data-go="diet">Diet</button>
+  <button data-go="log">Log</button>
+  <button data-go="profile">Profile</button>
+</nav>
+
+<script>
+const KEY = 'fit_coach_desi_v1';
+const EXERCISES = [
+  { id:'squat', name:'Squat', group:'Legs and hips', steps:['Stand with feet about shoulder-width apart.','Keep your back straight and push your hips back and down as if sitting on a chair.','Go as low as is comfortable, then push through your heels to stand up.'], mistakes:['Knees caving inward','Leaning the chest too far forward'], q:'how to do bodyweight squat correctly' },
+  { id:'pushup', name:'Push-up', group:'Chest and arms', steps:['Place hands slightly wider than your shoulders.','Keep your body in a straight line from head to heels.','Lower your chest toward the floor, then push back up.'], mistakes:['Letting the hips sag','Elbows flaring out too wide'], q:'how to do push ups correctly' },
+  { id:'plank', name:'Plank', group:'Core', steps:['Rest on your forearms and toes, lifting your body off the floor.','Keep a straight line from head to heels.','Tighten your belly and keep breathing normally.'], mistakes:['Hips dropping toward the floor','Shoulders creeping up toward the ears'], q:'how to do plank exercise correctly' },
+  { id:'lunge', name:'Lunge', group:'Legs', steps:['Step one foot forward.','Lower your back knee toward the floor, keeping the front knee above the ankle.','Push through the front foot to return to standing.'], mistakes:['Front knee going far past the toes','Leaning to one side'], q:'how to do lunges correctly' },
+  { id:'row', name:'Dumbbell row', group:'Back', steps:['Rest one hand and knee on a bench and bend forward.','Pull the dumbbell toward your hip, keeping your elbow close to your body.','Lower it slowly.'], mistakes:['Jerking the weight up with your back','Shrugging the shoulder up'], q:'how to do dumbbell row correctly' },
+  { id:'press', name:'Dumbbell shoulder press', group:'Shoulders', steps:['Hold dumbbells at shoulder height.','Press them straight up until your arms are almost straight.','Lower slowly back to shoulder height.'], mistakes:['Arching the lower back','Using weights that are too heavy'], q:'how to do dumbbell shoulder press correctly' },
+  { id:'deadlift', name:'Romanian deadlift', group:'Hamstrings and lower back', steps:['Hold the weight in front of your thighs, knees slightly bent.','Hinge at the hips and lower the weight along your legs, keeping your back flat.','Squeeze your glutes to return to standing.'], mistakes:['Rounding the lower back','Bending the knees too much'], q:'how to do romanian deadlift correctly' },
+  { id:'curl', name:'Bicep curl', group:'Arms', steps:['Hold a dumbbell in each hand, arms straight.','Curl the weights up while keeping your elbows still.','Lower slowly.'], mistakes:['Swinging the body to lift the weight','Elbows drifting forward'], q:'how to do bicep curl correctly' },
+  { id:'glute', name:'Glute bridge', group:'Glutes and core', steps:['Lie on your back with knees bent.','Lift your hips until your body forms a straight line from knees to shoulders.','Pause at the top, then lower slowly.'], mistakes:['Arching the lower back too much','Pushing through the toes instead of the heels'], q:'how to do glute bridge correctly' },
+  { id:'crunch', name:'Crunches', group:'Abs', steps:['Lie on your back, knees bent, hands lightly behind your head.','Lift your shoulders slightly off the floor.','Lower slowly.'], mistakes:['Pulling on the neck','Jerking the whole body up'], q:'how to do crunches correctly' }
+];
+
+const DEFAULT = { profile:null, routine:['squat','pushup','plank'], log:[] };
+let S = load();
+function load(){
+  try { const r = JSON.parse(localStorage.getItem(KEY)||'null'); return Object.assign({}, DEFAULT, r||{}); }
+  catch { return Object.assign({}, DEFAULT); }
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} }
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ytLink = q => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+
+function show(tab){
+  document.querySelectorAll('[data-tab]').forEach(s => s.hidden = s.dataset.tab !== tab);
+  document.querySelectorAll('#tabs button').forEach(b => {
+    if (b.dataset.go === tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => show(b.dataset.go));
+
+/* ---------- Profile and calculations ---------- */
+function calc(p){
+  // Mifflin-St Jeor formula, used only as a rough estimate.
+  const bmr = 10*p.w + 6.25*p.h - 5*p.age + (p.sex==='m' ? 5 : -161);
+  const tdee = Math.round(bmr * p.act);
+  const adj = { lose:-400, maintain:0, gain:300 }[p.goal];
+  const target = Math.max(1200, tdee + adj);
+  const protein = Math.round(p.w * 1.4);
+  const water = (p.w * 0.035).toFixed(1);
+  return { tdee, target, protein, water };
+}
+function fillProfile(){
+  const p = S.profile || {};
+  $('p-name').value = p.name||''; $('p-age').value = p.age||''; $('p-sex').value = p.sex||'m';
+  $('p-h').value = p.h||''; $('p-w').value = p.w||''; $('p-act').value = p.act||'1.375'; $('p-goal').value = p.goal||'maintain';
+}
+$('saveProfile').onclick = () => {
+  const age = +$('p-age').value, h = +$('p-h').value, w = +$('p-w').value;
+  if (!age || !h || !w) { $('saveProfile').textContent = 'Enter age, height and weight'; setTimeout(()=>$('saveProfile').textContent='Save', 1800); return; }
+  S.profile = { name:$('p-name').value.trim(), age, h, w, sex:$('p-sex').value, act:+$('p-act').value, goal:$('p-goal').value };
+  save(); renderHome(); show('home');
+};
+
+function renderHome(){
+  const card = $('homeCard');
+  if (!S.profile){
+    card.innerHTML = `<h2>Welcome!</h2><p class="mute">Start by entering your details in the Profile tab, so we can estimate your daily calories and protein.</p>`;
+  } else {
+    const c = calc(S.profile);
+    card.innerHTML = `
+      <h2>${esc(S.profile.name || 'Your')} estimate</h2>
+      <p class="mute">Approximate daily calories</p>
+      <div class="big">${c.target} kcal</div>
+      <div class="stat"><span>Protein (daily)</span><b>${c.protein} g</b></div>
+      <div class="stat"><span>Water (daily)</span><b>${c.water} litres</b></div>
+      <p class="mute" style="margin-top:10px">This is only an estimate. For the best results, consult a doctor or dietitian.</p>`;
+  }
+  const week = Date.now() - 7*864e5;
+  const recent = S.log.filter(l => l.t > week);
+  $('wk-count').textContent = recent.length;
+  $('set-count').textContent = recent.reduce((a,l)=>a+l.sets.length,0);
+}
+
+/* ---------- Workout builder ---------- */
+function renderPicker(){
+  $('exPick').innerHTML = EXERCISES.map(e => `
+    <label class="check">
+      <input type="checkbox" value="${e.id}" ${S.routine.includes(e.id)?'checked':''}>
+      <span><b>${esc(e.name)}</b><br><span class="mute">${esc(e.group)}</span></span>
+    </label>`).join('');
+}
+$('saveRoutine').onclick = () => {
+  S.routine = [...document.querySelectorAll('#exPick input:checked')].map(i => i.value);
+  save(); renderToday();
+};
+function renderToday(){
+  const box = $('todayWorkout');
+  const list = S.routine.map(id => EXERCISES.find(e => e.id === id)).filter(Boolean);
+  if (!list.length){ box.innerHTML = '<p class="empty">Select at least one exercise above.</p>'; return; }
+  box.innerHTML = list.map(e => `
+    <div class="ex">
+      <h3>${esc(e.name)}</h3>
+      <div class="set">
+        <label>Sets<input type="number" min="1" max="10" value="3" data-ex="${e.id}" data-f="sets"></label>
+        <label>Reps<input type="number" min="1" max="50" value="10" data-ex="${e.id}" data-f="reps"></label>
+        <label>Weight (kg)<input type="number" min="0" step="0.5" value="0" data-ex="${e.id}" data-f="kg"></label>
+      </div>
+    </div>`).join('') + `<button class="primary" id="logWorkout">Save workout</button>`;
+  $('logWorkout').onclick = logWorkout;
+}
+function logWorkout(){
+  const sets = S.routine.map(id => {
+    const g = f => document.querySelector(`[data-ex="${id}"][data-f="${f}"]`).value;
+    return { ex:id, sets:+g('sets')||0, reps:+g('reps')||0, kg:+g('kg')||0 };
+  });
+  S.log.unshift({ t:Date.now(), sets });
+  save(); renderLog(); renderHome(); show('log');
+}
+
+/* ---------- Gym guide ---------- */
+function renderGuide(){
+  $('guideList').innerHTML = EXERCISES.map(e => `
+    <div class="ex">
+      <h3>${esc(e.name)} <span class="pill">${esc(e.group)}</span></h3>
+      <p><b>Steps:</b></p>
+      <ul>${e.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+      <p><b class="warn">Common mistakes:</b></p>
+      <ul>${e.mistakes.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+      <p><a class="link" href="${ytLink(e.q)}" target="_blank" rel="noopener">Watch a video on YouTube &rarr;</a></p>
+    </div>`).join('');
+}
+
+/* ---------- Diet ---------- */
+function renderDiet(){
+  const c = S.profile ? calc(S.profile) : null;
+  const kcal = c ? c.target : 2000;
+  $('dietPlan').innerHTML = `
+    <p class="mute">Example for about ${kcal} kcal per day:</p>
+    <div class="stat"><span><b>Breakfast</b></span><span class="mute">2 eggs, 1 roti, tea or milk</span></div>
+    <div class="stat"><span><b>Lunch</b></span><span class="mute">Lentils or chicken, 1 roti, salad</span></div>
+    <div class="stat"><span><b>Snack</b></span><span class="mute">Yogurt, fruit, or chickpeas</span></div>
+    <div class="stat"><span><b>Dinner</b></span><span class="mute">Vegetables, a small portion of rice or 1 roti, salad</span></div>
+    <p class="mute" style="margin-top:10px">Cut back on fried food, sugary sweets, and cold drinks.</p>`;
+  $('waterTxt').textContent = `Drink about ${c ? c.water : '2.5'} litres of water a day, and more in hot weather.`;
+}
+
+/* ---------- Log ---------- */
+function renderLog(){
+  if (!S.log.length){ $('logList').innerHTML = '<p class="empty">No workouts saved yet.</p>'; return; }
+  $('logList').innerHTML = S.log.slice(0,30).map(l => {
+    const d = new Date(l.t).toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
+    const rows = l.sets.map(s => {
+      const e = EXERCISES.find(x => x.id === s.ex);
+      return `<div class="stat"><span>${esc(e ? e.name : s.ex)}</span><span class="mute">${s.sets} x ${s.reps}${s.kg ? ' @ '+s.kg+' kg' : ''}</span></div>`;
+    }).join('');
+    return `<div class="ex"><h3>${d}</h3>${rows}</div>`;
+  }).join('') + `<button class="ghost" id="clearLog" style="margin-top:14px;width:100%">Clear all logs</button>`;
+  $('clearLog').onclick = () => { S.log = []; save(); renderLog(); renderHome(); };
+}
+
+/* ---------- Start ---------- */
+fillProfile();
+renderPicker();
+renderToday();
+renderGuide();
+renderDiet();
+renderLog();
+renderHome();
+show(S.profile ? 'home' : 'profile');
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
+</body>
+</html>
